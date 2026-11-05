@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivilPrep Syllabus & Topic Tracker</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Font: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Status Button Styling */
+    .status-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .state-pending {
+      border: 2px dashed #94a3b8;
+      background-color: transparent;
+      color: transparent;
+    }
+    .dark .state-pending {
+      border-color: #64748b;
+    }
+    .state-progress {
+      border: 2px solid #f59e0b;
+      background-color: #fef3c7;
+      color: #d97706;
+    }
+    .dark .state-progress {
+      border-color: #f59e0b;
+      background-color: #78350f;
+      color: #fbbf24;
+    }
+    .state-completed {
+      border: 2px solid #10b981;
+      background-color: #10b981;
+      color: #ffffff;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      background-color: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen font-sans flex flex-col transition-colors duration-200">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-600 flex items-center justify-center text-white shadow-md">
+          <i class="fa-solid fa-graduation-cap text-base"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-base sm:text-lg leading-tight tracking-tight flex items-center gap-1.5 text-slate-900 dark:text-white">
+            CivilPrep <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300 font-bold uppercase tracking-wider">Tracker</span>
+          </h1>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">UPSC • BPSC • PSIR • UGC NET • CSAT • CA</p>
+        </div>
+      </div>
+
+      <!-- Header Action Controls -->
+      <div class="flex items-center gap-2">
+        <!-- Live Search -->
+        <div class="relative w-36 sm:w-56">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+          <input type="text" id="searchInput" placeholder="Search topic..." class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 font-medium transition" oninput="handleSearch(this.value)">
+        </div>
+
+        <!-- Fullscreen Button -->
+        <button id="fullscreenBtn" onclick="toggleFullScreen()" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-cyan-600 flex items-center justify-center transition text-sm" title="Toggle Fullscreen">
+          <i class="fa-solid fa-expand" id="fullscreenIcon"></i>
+        </button>
+
+        <!-- Day / Night Toggle -->
+        <button id="themeToggleBtn" onclick="toggleDarkMode()" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-amber-500 flex items-center justify-center transition text-sm" title="Toggle Day/Night Mode">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+
+        <!-- Data Backup Menu -->
+        <button onclick="exportDataJSON()" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-emerald-600 flex items-center justify-center transition text-sm" title="Export Backup JSON">
+          <i class="fa-solid fa-download"></i>
+        </button>
+        <button onclick="document.getElementById('importFileInput').click()" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 flex items-center justify-center transition text-sm" title="Import Backup JSON">
+          <i class="fa-solid fa-upload"></i>
+        </button>
+        <input type="file" id="importFileInput" class="hidden" accept=".json" onchange="importDataJSON(event)">
+      </div>
+    </div>
+
+    <!-- Main Exam Category Nav Tabs (6 Tabs) -->
+    <div class="border-t border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/60 overflow-x-auto scrollbar-none">
+      <div class="max-w-6xl mx-auto px-4 flex gap-1 sm:gap-2 py-1.5" id="categoryNavTabs">
+        <!-- Rendered Dynamically -->
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SUPABASE CLOUD ACCOUNT ================= -->
+  <section class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 text-xs font-extrabold text-slate-800 dark:text-slate-100">
+          <i class="fa-solid fa-cloud text-cyan-600"></i> Cloud Sync
+          <span id="cloudSyncStatus" class="font-semibold text-slate-500 dark:text-slate-400">Not connected — local mode</span>
+        </div>
+        <p id="cloudSyncHint" class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Sign in to sync your syllabus progress across devices.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <input id="authEmail" type="email" autocomplete="email" placeholder="Email" class="w-36 sm:w-44 text-xs px-2.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+        <input id="authPassword" type="password" autocomplete="current-password" placeholder="Password" class="w-32 sm:w-36 text-xs px-2.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+        <button id="signInBtn" onclick="signInWithEmail()" class="px-3 py-2 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold">Sign in</button>
+        <button id="signUpBtn" onclick="signUpWithEmail()" class="px-3 py-2 rounded-lg border border-cyan-700 text-cyan-700 dark:text-cyan-300 dark:border-cyan-500 text-xs font-bold">Create account</button>
+        <button id="signOutBtn" onclick="signOutUser()" class="hidden px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold">Sign out</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="max-w-6xl w-full mx-auto px-4 py-5 flex-1 flex flex-col gap-4">
+
+    <!-- Active Section Banner Card -->
+    <div id="sectionHeaderBanner" class="rounded-2xl p-4 sm:p-5 text-white shadow-md transition-all duration-300">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-[10px] tracking-wider uppercase font-extrabold px-2 py-0.5 rounded-full bg-white/20 backdrop-blur inline-block mb-1">
+            Exam Syllabus & Tracker
+          </span>
+          <h2 id="bannerTitle" class="text-xl sm:text-2xl font-black tracking-tight leading-snug">UPSC CSE</h2>
+          <p id="bannerDesc" class="text-xs sm:text-sm text-white/80 font-medium">Civil Services Examination • Prelims & Mains</p>
+        </div>
+
+        <!-- Progress Overview Widget -->
+        <div class="bg-black/25 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/15 min-w-[260px] sm:min-w-[300px] shadow-lg">
+          <div class="flex items-center justify-between gap-4 mb-2">
+            <div>
+              <span class="text-[11px] sm:text-xs font-black uppercase tracking-wider text-white/80 block">Overall Progress</span>
+              <span id="bannerProgressSub" class="text-xs text-white/70 font-semibold">0 of 0 Completed</span>
+            </div>
+            <!-- Extra Large Percentage Display -->
+            <div id="bannerProgressPercent" class="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight drop-shadow-sm text-white">0%</div>
+          </div>
+          <!-- Dual Progress Bar -->
+          <div class="w-full bg-white/20 h-3 rounded-full overflow-hidden flex shadow-inner">
+            <div id="bannerProgressBarDone" class="bg-emerald-400 h-full transition-all duration-300" style="width: 0%"></div>
+            <div id="bannerProgressBarProg" class="bg-amber-400 h-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <!-- Progress Counts -->
+          <div class="flex items-center justify-between text-xs font-bold mt-2.5 text-white/90">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span><span id="bannerDoneCount">0 Done</span></span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span id="bannerProgCount">0 Progress</span></span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span id="bannerPendCount">0 Pending</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-Divisions Pill Switcher (Prelims/Mains or Paper 1/Paper 2) -->
+    <div id="subTierContainer" class="flex items-center justify-center sm:justify-start gap-2 hidden">
+      <div class="inline-flex p-1 bg-slate-200/80 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-inner" id="subTierPills">
+        <!-- Rendered Dynamically -->
+      </div>
+    </div>
+
+    <!-- Filter Bar & Subject Action Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+      <!-- Status & Priority Filters -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Status Filter Chips -->
+        <div class="inline-flex bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-bold border border-slate-300/60 dark:border-slate-700">
+          <button onclick="setStatusFilter('all')" id="sf-all" class="px-2.5 py-1 rounded-md transition text-slate-700 dark:text-slate-300">All</button>
+          <button onclick="setStatusFilter('pending')" id="sf-pending" class="px-2.5 py-1 rounded-md transition text-slate-700 dark:text-slate-300">Pending</button>
+          <button onclick="setStatusFilter('in_progress')" id="sf-in_progress" class="px-2.5 py-1 rounded-md transition text-slate-700 dark:text-slate-300">In Progress</button>
+          <button onclick="setStatusFilter('completed')" id="sf-completed" class="px-2.5 py-1 rounded-md transition text-slate-700 dark:text-slate-300">Done</button>
+        </div>
+
+        <!-- Priority Filter Chips -->
+        <div class="inline-flex bg-slate-200/70 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-bold border border-slate-300/60 dark:border-slate-700">
+          <button onclick="setPriorityFilter('all')" id="pf-all" class="px-2 py-1 rounded-md transition text-slate-700 dark:text-slate-300">All Pri</button>
+          <button onclick="setPriorityFilter('high')" id="pf-high" class="px-2 py-1 rounded-md transition text-rose-600 dark:text-rose-400">High</button>
+          <button onclick="setPriorityFilter('medium')" id="pf-medium" class="px-2 py-1 rounded-md transition text-amber-600 dark:text-amber-400">Med</button>
+          <button onclick="setPriorityFilter('low')" id="pf-low" class="px-2 py-1 rounded-md transition text-slate-600 dark:text-slate-400">Low</button>
+        </div>
+      </div>
+
+      <!-- Add Custom Subject Button -->
+      <button onclick="openAddSubjectDialog()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs sm:text-sm shadow-sm transition active:scale-95 shrink-0">
+        <i class="fa-solid fa-plus text-xs"></i> Add Custom Subject
+      </button>
+    </div>
+
+    <!-- Active Topics Notice Legend -->
+    <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-1">
+      <span class="flex items-center gap-2">
+        <span>Click topic to cycle:</span>
+        <span class="inline-flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-300"><i class="fa-regular fa-circle text-[10px]"></i> Pending</span>
+        <i class="fa-solid fa-arrow-right text-[8px] text-slate-400"></i>
+        <span class="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400"><i class="fa-solid fa-spinner text-[10px]"></i> In Progress</span>
+        <i class="fa-solid fa-arrow-right text-[8px] text-slate-400"></i>
+        <span class="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400"><i class="fa-solid fa-check text-[10px]"></i> Done</span>
+      </span>
+      <span id="filteredResultsLabel" class="hidden font-bold text-cyan-600 dark:text-cyan-400"></span>
+    </div>
+
+    <!-- Subject Cards Container (Standard Vertical Layout) -->
+    <div id="subjectCardsList" class="flex flex-col gap-4">
+      <!-- Subjects Rendered Dynamically -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-12 px-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3 text-xl">
+        <i class="fa-solid fa-box-open"></i>
+      </div>
+      <h3 class="font-bold text-base text-slate-800 dark:text-slate-200">No topics or subjects found</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Try resetting filters or search, or add a custom subject.</p>
+    </div>
+
+  </main>
+
+  <!-- ================= ADD SUBJECT MODAL ================= -->
+  <div id="addSubjectModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 border border-slate-200 dark:border-slate-800 shadow-xl transition-transform">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-book-bookmark text-cyan-600"></i> Add Custom Subject
+        </h3>
+        <button onclick="closeAddSubjectDialog()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="py-4 space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Subject Title</label>
+          <input type="text" id="newSubjectTitle" placeholder="e.g. Modern Indian History, Ethics Case Studies..." class="w-full text-sm px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 font-medium">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Color Theme Tag</label>
+          <div class="flex items-center gap-2" id="subjectColorPicker">
+            <button type="button" data-color="teal" class="color-picker-dot w-7 h-7 rounded-full bg-teal-600 ring-2 ring-offset-2 ring-teal-600 dark:ring-offset-slate-900 transition"></button>
+            <button type="button" data-color="blue" class="color-picker-dot w-7 h-7 rounded-full bg-blue-600 transition"></button>
+            <button type="button" data-color="violet" class="color-picker-dot w-7 h-7 rounded-full bg-violet-600 transition"></button>
+            <button type="button" data-color="amber" class="color-picker-dot w-7 h-7 rounded-full bg-amber-600 transition"></button>
+            <button type="button" data-color="rose" class="color-picker-dot w-7 h-7 rounded-full bg-rose-600 transition"></button>
+            <button type="button" data-color="slate" class="color-picker-dot w-7 h-7 rounded-full bg-slate-600 transition"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <button onclick="closeAddSubjectDialog()" class="px-3.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Cancel</button>
+        <button onclick="saveNewSubject()" class="px-4 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow transition">Create Subject</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADD TOPIC MODAL (WITH PRIORITY SELECTOR) ================= -->
+  <div id="addTopicModal" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-5 border border-slate-200 dark:border-slate-800 shadow-xl transition-transform">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-cyan-600"></i> Add Topic(s)
+          </h3>
+          <p id="modalSubjectNameSub" class="text-xs text-slate-500 dark:text-slate-400 font-medium">Under: General Studies</p>
+        </div>
+        <button onclick="closeAddTopicDialog()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="py-4 space-y-3.5">
+        <!-- Topic Name Field -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Topic Name(s)</label>
+          <textarea id="newTopicNamesInput" rows="4" placeholder="Enter topics separated by commas or new lines...&#10;e.g.:&#10;Preamble & Features&#10;Fundamental Rights&#10;Directive Principles (DPSP)" class="w-full text-sm px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 font-medium"></textarea>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Tip: Paste a whole syllabus list separated by commas or enters.</p>
+        </div>
+
+        <!-- Priority Selector Level -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Priority Level</label>
+          <div class="grid grid-cols-3 gap-2" id="topicPrioritySelectorGroup">
+            <!-- High Priority -->
+            <button type="button" onclick="selectModalPriority('high')" id="priorityBtn-high" class="py-2 px-2 rounded-xl border-2 border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span> High
+            </button>
+            <!-- Medium Priority -->
+            <button type="button" onclick="selectModalPriority('medium')" id="priorityBtn-medium" class="py-2 px-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition hover:border-amber-400">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span> Medium
+            </button>
+            <!-- Low Priority -->
+            <button type="button" onclick="selectModalPriority('low')" id="priorityBtn-low" class="py-2 px-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition hover:border-slate-400">
+              <span class="w-2 h-2 rounded-full bg-slate-400"></span> Low
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <button onclick="closeAddTopicDialog()" class="px-3.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Cancel</button>
+        <button onclick="saveNewTopics()" class="px-4 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow transition">Add Topics</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-4 py-2.5 rounded-xl shadow-lg text-xs font-bold flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600"></i>
+    <span id="toastMessage">Action completed</span>
+  </div>
+
+  <!-- Supabase JavaScript client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    /* ---------------- INITIAL SCHEMA & STARTER SYLLABUS ---------------- */
+    const DEFAULT_APP_DATA = {
+      upsc: {
+        title: "UPSC CSE",
+        desc: "Civil Services Examination • Prelims & Mains",
+        colorClass: "from-cyan-700 via-teal-700 to-emerald-800",
+        hasSubTiers: true,
+        subTierLabels: {
+          tier1: { label: "Prelims", icon: "bullseye" },
+          tier2: { label: "Mains", icon: "pen-nib" }
+        },
+        subjects: {
+          tier1: [
+            {
+              id: "upsc_p_polity",
+              title: "Indian Polity & Governance",
+              color: "teal",
+              topics: [
+                { id: "tp1", name: "Preamble, Union & Territories, Citizenship", status: "pending", priority: "high" },
+                { id: "tp2", name: "Fundamental Rights, DPSP & Fundamental Duties", status: "pending", priority: "high" },
+                { id: "tp3", name: "Union Executive (President, PM, Council)", status: "pending", priority: "high" },
+                { id: "tp4", name: "Parliament & State Legislatures", status: "pending", priority: "high" },
+                { id: "tp5", name: "Judiciary (Supreme Court, High Courts, Tribunals)", status: "pending", priority: "medium" },
+                { id: "tp6", name: "Constitutional & Non-Constitutional Bodies", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "upsc_p_history",
+              title: "History of India & National Movement",
+              color: "amber",
+              topics: [
+                { id: "tp7", name: "Indus Valley, Vedic Age & Mahajanapadas", status: "pending", priority: "medium" },
+                { id: "tp8", name: "Mauryan, Gupta & Post-Gupta Empires", status: "pending", priority: "medium" },
+                { id: "tp9", name: "Medieval Kingdoms, Delhi Sultanate & Mughals", status: "pending", priority: "low" },
+                { id: "tp10", name: "British Expansion & 1857 Revolt", status: "pending", priority: "high" },
+                { id: "tp11", name: "INC, Moderates, Extremists & Swadeshi Movement", status: "pending", priority: "high" },
+                { id: "tp12", name: "Gandhian Era, Civil Disobedience & Quit India", status: "pending", priority: "high" }
+              ]
+            },
+            {
+              id: "upsc_p_geo",
+              title: "Indian & World Geography",
+              color: "blue",
+              topics: [
+                { id: "tp13", name: "Geomorphology, Climatology & Oceanography", status: "pending", priority: "medium" },
+                { id: "tp14", name: "Physiographic Divisions & Drainage System of India", status: "pending", priority: "high" },
+                { id: "tp15", name: "Monsoons, Climate & Natural Vegetation of India", status: "pending", priority: "high" },
+                { id: "tp16", name: "Economic & Human Geography, Minerals, Industries", status: "pending", priority: "low" }
+              ]
+            },
+            {
+              id: "upsc_p_eco",
+              title: "Economy & Sustainable Development",
+              color: "emerald",
+              topics: [
+                { id: "tp17", name: "National Income, GDP & Economic Growth", status: "pending", priority: "high" },
+                { id: "tp18", name: "Monetary Policy, Banking & Inflation", status: "pending", priority: "high" },
+                { id: "tp19", name: "Fiscal Policy, Budgeting & Taxation System", status: "pending", priority: "high" },
+                { id: "tp20", name: "External Sector, Balance of Payments & WTO", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "upsc_p_env",
+              title: "Environment, Ecology & Biodiversity",
+              color: "teal",
+              topics: [
+                { id: "tp21", name: "Ecosystem Functions, Food Chains & Biomes", status: "pending", priority: "high" },
+                { id: "tp22", name: "Biodiversity Hotspots, Protected Areas & Red List", status: "pending", priority: "high" },
+                { id: "tp23", name: "Climate Change, COP Summits & Conventions (UNFCCC, CBD)", status: "pending", priority: "high" }
+              ]
+            }
+          ],
+          tier2: [
+            {
+              id: "upsc_m_gs1",
+              title: "GS Paper 1: Heritage, Society & Geography",
+              color: "amber",
+              topics: [
+                { id: "tp24", name: "Indian Art Forms, Literature & Architecture", status: "pending", priority: "medium" },
+                { id: "tp25", name: "Modern Indian History (mid-18th century to present)", status: "pending", priority: "high" },
+                { id: "tp26", name: "Post-Independence Consolidation & Reorganization", status: "pending", priority: "medium" },
+                { id: "tp27", name: "Salient Features of Indian Society & Diversity", status: "pending", priority: "medium" },
+                { id: "tp28", name: "World Physical Geography & Resource Distribution", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "upsc_m_gs2",
+              title: "GS Paper 2: Governance, Polity & IR",
+              color: "teal",
+              topics: [
+                { id: "tp29", name: "Constitutional Comparison & Federal Structure", status: "pending", priority: "high" },
+                { id: "tp30", name: "Representation of People's Act & Electoral Reforms", status: "pending", priority: "high" },
+                { id: "tp31", name: "Welfare Schemes for Vulnerable Sections", status: "pending", priority: "high" },
+                { id: "tp32", name: "India and its Neighborhood Relations", status: "pending", priority: "high" },
+                { id: "tp33", name: "Important International Institutions & Agencies", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "upsc_m_gs3",
+              title: "GS Paper 3: Economy, Tech & Security",
+              color: "blue",
+              topics: [
+                { id: "tp34", name: "Indian Economy, Resource Mobilization & Employment", status: "pending", priority: "high" },
+                { id: "tp35", name: "Major Crop Patterns, Irrigation & Food Security", status: "pending", priority: "high" },
+                { id: "tp36", name: "Science & Tech Developments & Indigenization", status: "pending", priority: "medium" },
+                { id: "tp37", name: "Disaster Management & Resilience Planning", status: "pending", priority: "medium" },
+                { id: "tp38", name: "Linkages between Development & Extremism / Internal Security", status: "pending", priority: "high" }
+              ]
+            },
+            {
+              id: "upsc_m_gs4",
+              title: "GS Paper 4: Ethics, Integrity & Aptitude",
+              color: "violet",
+              topics: [
+                { id: "tp39", name: "Ethics and Human Interface; Moral Philosophers", status: "pending", priority: "high" },
+                { id: "tp40", name: "Attitude, Emotional Intelligence & Civil Service Values", status: "pending", priority: "high" },
+                { id: "tp41", name: "Probity in Governance & Codes of Conduct", status: "pending", priority: "high" },
+                { id: "tp42", name: "Case Studies on Ethical Dilemmas", status: "pending", priority: "high" }
+              ]
+            }
+          ]
+        }
+      },
+
+      bpsc: {
+        title: "BPSC",
+        desc: "Bihar Public Service Commission Combined Competitive Exam",
+        colorClass: "from-amber-600 via-orange-600 to-amber-700",
+        hasSubTiers: true,
+        subTierLabels: {
+          tier1: { label: "Prelims", icon: "bullseye" },
+          tier2: { label: "Mains", icon: "pen-nib" }
+        },
+        subjects: {
+          tier1: [
+            {
+              id: "bpsc_p_bihar",
+              title: "Bihar Special GK & History",
+              color: "amber",
+              topics: [
+                { id: "bp1", name: "Ancient Bihar (Magadha, Maurya, Buddhism, Jainism)", status: "pending", priority: "high" },
+                { id: "bp2", name: "Role of Bihar in 1857 Revolt & Freedom Struggle (Kunwar Singh)", status: "pending", priority: "high" },
+                { id: "bp3", name: "Champaran Satyagraha & Kisan Sabha Movement (Sahajanand Saraswati)", status: "pending", priority: "high" },
+                { id: "bp4", name: "Quit India Movement in Bihar & Azad Dasta", status: "pending", priority: "high" }
+              ]
+            },
+            {
+              id: "bpsc_p_geo",
+              title: "Bihar & Indian Geography",
+              color: "blue",
+              topics: [
+                { id: "bp5", name: "Physical Geography of Bihar & River Systems (Ganga, Son, Kosi)", status: "pending", priority: "high" },
+                { id: "bp6", name: "Forests, Climate & Agro-Climatic Zones in Bihar", status: "pending", priority: "medium" },
+                { id: "bp7", name: "Minerals & Industries in Bihar & India", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "bpsc_p_sci",
+              title: "General Science & Mental Ability",
+              color: "teal",
+              topics: [
+                { id: "bp8", name: "Physics & Mechanics in Daily Life", status: "pending", priority: "medium" },
+                { id: "bp9", name: "Chemistry: Acids, Bases, Salts & Everyday Chemistry", status: "pending", priority: "medium" },
+                { id: "bp10", name: "Biology: Human Physiology, Diseases, Vitamins & Nutrition", status: "pending", priority: "high" },
+                { id: "bp11", name: "General Mental Ability & Basic Reasoning", status: "pending", priority: "medium" }
+              ]
+            }
+          ],
+          tier2: [
+            {
+              id: "bpsc_m_hindi",
+              title: "General Hindi (Qualifying)",
+              color: "slate",
+              topics: [
+                { id: "bpm1", name: "Nibandh (Essay Writing)", status: "pending", priority: "medium" },
+                { id: "bpm2", name: "Vyakaran (Grammar, Idioms, Sandhi, Samas)", status: "pending", priority: "medium" },
+                { id: "bpm3", name: "Sankshepan (Précis Writing)", status: "pending", priority: "low" }
+              ]
+            },
+            {
+              id: "bpsc_m_gs1",
+              title: "GS Paper 1: History, Culture & Statistics",
+              color: "amber",
+              topics: [
+                { id: "bpm4", name: "Modern History of India & Bihar with Special Focus on Western Education", status: "pending", priority: "high" },
+                { id: "bpm5", name: "Patna Kalam, Mauryan Art & Madhubani Paintings", status: "pending", priority: "high" },
+                { id: "bpm6", name: "Statistical Analysis, Graphs & Diagrams (DI)", status: "pending", priority: "high" }
+              ]
+            },
+            {
+              id: "bpsc_m_gs2",
+              title: "GS Paper 2: Polity, Economy, Geo & Sci-Tech",
+              color: "teal",
+              topics: [
+                { id: "bpm7", name: "Indian Political System with Special Reference to Bihar", status: "pending", priority: "high" },
+                { id: "bpm8", name: "Economic Planning, Agricultural Development in Bihar", status: "pending", priority: "high" },
+                { id: "bpm9", name: "Role of Science & Tech in Developing Bihar", status: "pending", priority: "high" }
+              ]
+            }
+          ]
+        }
+      },
+
+      psir: {
+        title: "PSIR Optional",
+        desc: "Political Science & International Relations",
+        colorClass: "from-rose-800 via-rose-700 to-pink-900",
+        hasSubTiers: true,
+        subTierLabels: {
+          tier1: { label: "Paper 1", icon: "book-open" },
+          tier2: { label: "Paper 2", icon: "globe" }
+        },
+        subjects: {
+          tier1: [
+            {
+              id: "psir_p1_wpt",
+              title: "Section A: Western Political Thought",
+              color: "rose",
+              topics: [
+                { id: "psi1", name: "Plato: Theory of Ideas, Philosopher King, Justice", status: "pending", priority: "high" },
+                { id: "psi2", name: "Aristotle: State, Justice, Citizenship, Revolution", status: "pending", priority: "high" },
+                { id: "psi3", name: "Machiavelli: Power Politics & Secularization of Politics", status: "pending", priority: "high" },
+                { id: "psi4", name: "Hobbes, Locke & Rousseau: Social Contract Theory", status: "pending", priority: "high" },
+                { id: "psi5", name: "J.S. Mill: Liberty & Representative Government", status: "pending", priority: "medium" },
+                { id: "psi6", name: "Karl Marx: Historical Materialism & Alienation", status: "pending", priority: "high" },
+                { id: "psi7", name: "Gramsci: Hegemony & Civil Society", status: "pending", priority: "medium" },
+                { id: "psi8", name: "Hannah Arendt: Totalitarianism & Theory of Action", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "psir_p1_ipt",
+              title: "Section A: Indian Political Thought & Political Theory",
+              color: "amber",
+              topics: [
+                { id: "psi9", name: "Kautilya: Arthashastra, Saptanga Theory & Mandala", status: "pending", priority: "high" },
+                { id: "psi10", name: "M.K. Gandhi: Swaraj, Satyagraha & Trusteeship", status: "pending", priority: "high" },
+                { id: "psi11", name: "B.R. Ambedkar: Annihilation of Caste & Constitutionalism", status: "pending", priority: "high" },
+                { id: "psi12", name: "Theories of Justice (Rawls & Nozick)", status: "pending", priority: "high" },
+                { id: "psi13", name: "Theories of Democracy, Rights & Sovereignty", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "psir_p1_secb",
+              title: "Section B: Indian Government & Politics",
+              color: "teal",
+              topics: [
+                { id: "psi14", name: "Indian Nationalism & Making of Constitution", status: "pending", priority: "medium" },
+                { id: "psi15", name: "Federalism, Center-State Relations & Local Self-Govt", status: "pending", priority: "high" },
+                { id: "psi16", name: "Party System, Caste & Religion in Indian Politics", status: "pending", priority: "high" }
+              ]
+            }
+          ],
+          tier2: [
+            {
+              id: "psir_p2_seca",
+              title: "Section A: Comparative Politics & IR Theories",
+              color: "violet",
+              topics: [
+                { id: "psi17", name: "Theories of IR: Realism, Liberalism & Marxist Approaches", status: "pending", priority: "high" },
+                { id: "psi18", name: "Feminist & Constructivist Perspectives in IR", status: "pending", priority: "medium" },
+                { id: "psi19", name: "Balance of Power, Collective Security & Deterrence", status: "pending", priority: "high" },
+                { id: "psi20", name: "Global Financial Architecture (IMF, WB, WTO)", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "psir_p2_secb",
+              title: "Section B: India and the World",
+              color: "rose",
+              topics: [
+                { id: "psi21", name: "Determinants & Evolution of India's Foreign Policy", status: "pending", priority: "high" },
+                { id: "psi22", name: "India and South Asia (Neighborhood First & SAARC)", status: "pending", priority: "high" },
+                { id: "psi23", name: "India and Major Powers (USA, Russia, China, EU)", status: "pending", priority: "high" },
+                { id: "psi24", name: "Reforms of the United Nations System & UNSC Expansion", status: "pending", priority: "medium" }
+              ]
+            }
+          ]
+        }
+      },
+
+      ugcnet: {
+        title: "UGC NET",
+        desc: "Teaching, Research & Political Science Core",
+        colorClass: "from-violet-800 via-purple-700 to-indigo-900",
+        hasSubTiers: true,
+        subTierLabels: {
+          tier1: { label: "Paper 1 (General)", icon: "book-open" },
+          tier2: { label: "Paper 2 (Core)", icon: "pen-nib" }
+        },
+        subjects: {
+          tier1: [
+            {
+              id: "ugc_p1_teach",
+              title: "Teaching & Research Aptitude",
+              color: "violet",
+              topics: [
+                { id: "ug1", name: "Teaching: Concepts, Objectives, Levels of Teaching (Memory, Understanding, Reflective)", status: "pending", priority: "high" },
+                { id: "ug2", name: "Factors Affecting Teaching Related to Teacher & Learner", status: "pending", priority: "medium" },
+                { id: "ug3", name: "Research: Types, Methods (Experimental, Descriptive, Historical)", status: "pending", priority: "high" },
+                { id: "ug4", name: "Steps of Research, Thesis Writing & Research Ethics", status: "pending", priority: "high" }
+              ]
+            },
+            {
+              id: "ugc_p1_reason",
+              title: "Comprehension, Reasoning & ICT",
+              color: "blue",
+              topics: [
+                { id: "ug5", name: "Reading Comprehension & Critical Passages", status: "pending", priority: "medium" },
+                { id: "ug6", name: "Effective Communication & Barriers", status: "pending", priority: "low" },
+                { id: "ug7", name: "Mathematical Aptitude: Series, Codes, Fraction, Percentage", status: "pending", priority: "medium" },
+                { id: "ug8", name: "Logical Reasoning: Classical Square of Opposition, Syllogisms", status: "pending", priority: "high" },
+                { id: "ug9", name: "Indian Logic: Means of Knowledge (Pramanas: Pratyaksha, Anumana)", status: "pending", priority: "high" },
+                { id: "ug10", name: "ICT: Basics, Internet, Email, Digital Initiatives in Higher Education", status: "pending", priority: "medium" }
+              ]
+            },
+            {
+              id: "ugc_p1_env_edu",
+              title: "People, Environment & Higher Education",
+              color: "teal",
+              topics: [
+                { id: "ug11", name: "Development and Environment: MDGs and SDGs", status: "pending", priority: "high" },
+                { id: "ug12", name: "Environmental Issues, Pollution & Climate Change Agreements", status: "pending", priority: "high" },
+                { id: "ug13", name: "Higher Education System in Ancient and Modern India", status: "pending", priority: "medium" },
+                { id: "ug14", name: "Value Education, NEP 2020 & Governance Policies", status: "pending", priority: "high" }
+              ]
+            }
+          ],
+          tier2: [
+            {
+              id: "ugc_p2_core1",
+              title: "Units 1-5: Political Theory & Thought",
+              color: "violet",
+              topics: [
+                { id: "ug15", name: "Unit 1: Political Theory: Concepts of Liberty, Equality, Justice, Rights, Power", status: "pending", priority: "high" },
+                { id: "ug16", name: "Unit 2: Political Thought: Plato, Aristotle, Machiavelli, Hobbes, Locke, Marx, Gramsci", status: "pending", priority: "high" },
+                { id: "ug17", name: "Unit 3: Indian Political Thought: Kautilya, Barani, Tilak, Gandhi, Aurobindo, Ambedkar", status: "pending", priority: "high" },
+                { id: "ug18", name: "Unit 4: Comparative Political Analysis: Approaches, Colonialism, Regime Types", status: "pending", priority: "medium" },
+                { id: "ug19", name: "Unit 5: International Relations: Theories, Security, Weapons of Mass Destruction", status: "pending", priority: "high" }
+              ]
+            },
+            {
+              id: "ugc_p2_core2",
+              title: "Units 6-10: Indian Foreign Policy & Institutions",
+              color: "indigo",
+              topics: [
+                { id: "ug20", name: "Unit 6: India's Foreign Policy: Determinants, Look East / Act East", status: "pending", priority: "high" },
+                { id: "ug21", name: "Unit 7: Political Institutions in India: Making, Executive, Parliament, Judiciary", status: "pending", priority: "high" },
+                { id: "ug22", name: "Unit 8: Political Processes in India: State, Economy, Identity Politics, Movements", status: "pending", priority: "medium" },
+                { id: "ug23", name: "Unit 9: Public Administration: Scientific Management, Bureaucracy, NPA, Good Governance", status: "pending", priority: "high" },
+                { id: "ug24", name: "Unit 10: Governance and Public Policy in India: Institutional Mechanisms & RTI", status: "pending", priority: "medium" }
+              ]
+            }
+          ]
+        }
+      },
+
+      current_affairs: {
+        title: "Current Affairs",
+        desc: "Monthly Compilations, Govt Schemes & Editorial Tracker",
+        colorClass: "from-blue-700 via-sky-700 to-cyan-800",
+        hasSubTiers: false,
+        subjects: [
+          {
+            id: "ca_monthly",
+            title: "Monthly Compilations (Vision / Insight)",
+            color: "blue",
+            topics: [
+              { id: "ca1", name: "Polity & Governance Issues Compilation", status: "pending", priority: "high" },
+              { id: "ca2", name: "International Relations & Bilateral Summits", status: "pending", priority: "high" },
+              { id: "ca3", name: "Economy, Banking & Trade Updates", status: "pending", priority: "high" },
+              { id: "ca4", name: "Environment, COP Meetings & Wildlife Declarations", status: "pending", priority: "high" },
+              { id: "ca5", name: "Science & Technology, Space (ISRO/NASA) & Defence", status: "pending", priority: "medium" }
+            ]
+          },
+          {
+            id: "ca_schemes",
+            title: "Government Schemes & Reports",
+            color: "teal",
+            topics: [
+              { id: "ca6", name: "Flagship Ministry Schemes (WCD, MoRD, MoHUA)", status: "pending", priority: "high" },
+              { id: "ca7", name: "Annual Economic Survey & Union Budget Highlights", status: "pending", priority: "high" },
+              { id: "ca8", name: "Important NITI Aayog Reports & Global Indices", status: "pending", priority: "medium" }
+            ]
+          }
+        ]
+      },
+
+      csat: {
+        title: "CSAT",
+        desc: "Paper II: Aptitude, Reasoning, Comprehension & Data Interpretation",
+        colorClass: "from-slate-800 via-slate-700 to-cyan-900",
+        hasSubTiers: false,
+        subjects: [
+          {
+            id: "csat_quant",
+            title: "Quantitative Aptitude (Maths)",
+            color: "blue",
+            topics: [
+              { id: "cs1", name: "Number System, Divisibility Rules & Remainder Theorem", status: "pending", priority: "high" },
+              { id: "cs2", name: "LCM, HCF & Decimal Fractions", status: "pending", priority: "medium" },
+              { id: "cs3", name: "Percentages, Profit & Loss, Simple & Compound Interest", status: "pending", priority: "high" },
+              { id: "cs4", name: "Ratios, Proportions, Mixtures & Alligations", status: "pending", priority: "medium" },
+              { id: "cs5", name: "Time, Work, Pipes & Cisterns", status: "pending", priority: "high" },
+              { id: "cs6", name: "Time, Speed, Distance, Trains & Boats", status: "pending", priority: "high" },
+              { id: "cs7", name: "Permutations, Combinations & Probability", status: "pending", priority: "high" }
+            ]
+          },
+          {
+            id: "csat_reasoning",
+            title: "Logical & Analytical Reasoning",
+            color: "teal",
+            topics: [
+              { id: "cs8", name: "Syllogisms & Deductive Reasoning", status: "pending", priority: "high" },
+              { id: "cs9", name: "Blood Relations & Family Tree Problems", status: "pending", priority: "medium" },
+              { id: "cs10", name: "Direction Sense & Distance Tests", status: "pending", priority: "medium" },
+              { id: "cs11", name: "Seating Arrangements (Linear & Circular)", status: "pending", priority: "high" },
+              { id: "cs12", name: "Number, Alphabet & Symbol Series", status: "pending", priority: "low" },
+              { id: "cs13", name: "Clocks, Calendars & Coding-Decoding", status: "pending", priority: "medium" }
+            ]
+          },
+          {
+            id: "csat_comprehension",
+            title: "Reading Comprehension",
+            color: "amber",
+            topics: [
+              { id: "cs14", name: "Critical Inferences & Deductions", status: "pending", priority: "high" },
+              { id: "cs15", name: "Crucial Assumptions & Implications", status: "pending", priority: "high" },
+              { id: "cs16", name: "Main Idea, Tone of Author & Central Theme", status: "pending", priority: "medium" }
+            ]
+          },
+          {
+            id: "csat_di",
+            title: "Data Interpretation & Sufficiency",
+            color: "rose",
+            topics: [
+              { id: "cs17", name: "Tables, Tabular Data & Missing Numbers", status: "pending", priority: "medium" },
+              { id: "cs18", name: "Bar Graphs, Pie Charts & Line Graphs", status: "pending", priority: "high" },
+              { id: "cs19", name: "Data Sufficiency Statements (S1, S2)", status: "pending", priority: "high" }
+            ]
+          }
+        ]
+      }
+    };
+
+    /* ---------------- SUPABASE CONFIGURATION ---------------- */
+    // Replace these two values with your Supabase project's URL and anon/public key.
+    // The anon key is intended for browser use. NEVER put a service_role key here.
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_OR_PUBLISHABLE_KEY';
+    const SUPABASE_TABLE = 'civilprep_user_data';
+    const supabaseConfigured =
+      SUPABASE_URL.startsWith('https://') &&
+      !SUPABASE_URL.includes('YOUR_PROJECT_ID') &&
+      SUPABASE_ANON_KEY.length > 20 &&
+      !SUPABASE_ANON_KEY.includes('YOUR_SUPABASE');
+    const supabaseClient = supabaseConfigured
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+    let currentUser = null;
+    let cloudReady = false;
+    let cloudSaveTimer = null;
+    let cloudSaveInFlight = false;
+
+    /* ---------------- STATE MANAGEMENT ---------------- */
+    const STORAGE_KEY = 'civilprep_tracker_v3';
+    let appData = {};
+    let activeCategory = 'upsc';
+    let activeSubTier = 'tier1';
+    let activeStatusFilter = 'all';     // 'all' | 'pending' | 'in_progress' | 'completed'
+    let activePriorityFilter = 'all';   // 'all' | 'high' | 'medium' | 'low'
+    let searchQuery = '';
+    let selectedColorForNewSubject = 'teal';
+    let selectedPriorityForNewTopic = 'high';
+    let currentTargetSubjectId = null;
+
+    /* ---------------- DATA INITIALIZATION & MIGRATION ---------------- */
+    function initializeData() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          appData = JSON.parse(stored);
+        } else {
+          appData = JSON.parse(JSON.stringify(DEFAULT_APP_DATA));
+        }
+      } catch (err) {
+        console.error("Error reading localStorage", err);
+        appData = JSON.parse(JSON.stringify(DEFAULT_APP_DATA));
+      }
+
+      // Schema Migration & Integrity Check
+      ensureSchemaIntegrity();
+      saveData();
+    }
+
+    function ensureSchemaIntegrity() {
+      // Ensure all 6 categories exist
+      for (const catKey in DEFAULT_APP_DATA) {
+        if (!appData[catKey]) {
+          appData[catKey] = JSON.parse(JSON.stringify(DEFAULT_APP_DATA[catKey]));
+        }
+      }
+
+      // Ensure UPSC has the new emerald-teal gradient
+      appData.upsc.colorClass = "from-cyan-700 via-teal-700 to-emerald-800";
+      // Ensure UGC NET has the new violet gradient
+      appData.ugcnet.colorClass = "from-violet-800 via-purple-700 to-indigo-900";
+
+      // Ensure topics have 'status' and 'priority' fields
+      for (const catKey in appData) {
+        const cat = appData[catKey];
+        if (cat.hasSubTiers) {
+          for (const tierKey in cat.subjects) {
+            cat.subjects[tierKey].forEach(sub => normalizeTopics(sub));
+          }
+        } else {
+          cat.subjects.forEach(sub => normalizeTopics(sub));
+        }
+      }
+    }
+
+    function normalizeTopics(subject) {
+      if (!Array.isArray(subject.topics)) subject.topics = [];
+      subject.topics.forEach(t => {
+        // Normalize status
+        if (!t.status) {
+          t.status = t.completed ? 'completed' : 'pending';
+        }
+        // Normalize priority
+        if (!t.priority) {
+          t.priority = 'medium';
+        }
+      });
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {
+        console.error("Error saving to localStorage", e);
+      }
+      // Cloud writes are debounced so rapid topic clicks do not create many requests.
+      if (currentUser && cloudReady) scheduleCloudSave();
+    }
+
+    function setCloudStatus(message, hint = '') {
+      const status = document.getElementById('cloudSyncStatus');
+      const help = document.getElementById('cloudSyncHint');
+      if (status) status.textContent = message;
+      if (help) help.textContent = hint;
+    }
+
+    function scheduleCloudSave() {
+      clearTimeout(cloudSaveTimer);
+      setCloudStatus('Changes pending…', 'Your progress will be saved to your account automatically.');
+      cloudSaveTimer = setTimeout(saveDataToCloud, 700);
+    }
+
+    async function saveDataToCloud() {
+      if (!supabaseClient || !currentUser || !cloudReady || cloudSaveInFlight) return;
+      cloudSaveInFlight = true;
+      const snapshot = JSON.parse(JSON.stringify(appData));
+      try {
+        const { error } = await supabaseClient
+          .from(SUPABASE_TABLE)
+          .upsert({ user_id: currentUser.id, data: snapshot, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+        if (error) throw error;
+        setCloudStatus('Synced ✓', `Signed in as ${currentUser.email || 'your account'} · Saved to cloud`);
+      } catch (error) {
+        console.error('Supabase save failed:', error);
+        setCloudStatus('Sync error', error.message || 'Could not save to cloud. Your local copy is still available.');
+      } finally {
+        cloudSaveInFlight = false;
+        // If the user changed data while a request was in flight, queue one more save.
+        if (currentUser && cloudReady && JSON.stringify(appData) !== JSON.stringify(snapshot)) scheduleCloudSave();
+      }
+    }
+
+    async function loadUserCloudData(user) {
+      if (!supabaseClient || !user) return;
+      cloudReady = false;
+      setCloudStatus('Loading cloud data…', 'Checking your saved CivilPrep progress.');
+      try {
+        const { data, error } = await supabaseClient
+          .from(SUPABASE_TABLE)
+          .select('data')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (error) throw error;
+        if (data && data.data && typeof data.data === 'object') {
+          appData = data.data;
+          ensureSchemaIntegrity();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+          renderApp();
+          setCloudStatus('Synced ✓', `Cloud progress loaded for ${user.email || 'your account'}.`);
+        } else {
+          // First login: upload this browser's existing local progress to the account.
+          setCloudStatus('Creating cloud backup…', 'Uploading this browser’s current progress to your account.');
+          cloudReady = true;
+          await saveDataToCloud();
+        }
+      } catch (error) {
+        console.error('Supabase load failed:', error);
+        setCloudStatus('Sync error', error.message || 'Could not load cloud data. Local data remains available.');
+      } finally {
+        cloudReady = true;
+      }
+    }
+
+    function updateAuthControls(user) {
+      const signedIn = !!user;
+      ['authEmail', 'authPassword', 'signInBtn', 'signUpBtn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', signedIn);
+      });
+      const signOut = document.getElementById('signOutBtn');
+      if (signOut) signOut.classList.toggle('hidden', !signedIn);
+    }
+
+    async function signUpWithEmail() {
+      if (!supabaseClient) return showToast('Add your Supabase URL and anon key in the script first');
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      if (!email || password.length < 6) return showToast('Enter an email and password (at least 6 characters)');
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) return showToast(error.message);
+      if (data.session) showToast('Account created and signed in');
+      else showToast('Account created. Check your email to confirm, then sign in.');
+    }
+
+    async function signInWithEmail() {
+      if (!supabaseClient) return showToast('Add your Supabase URL and anon key in the script first');
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      if (!email || !password) return showToast('Enter your email and password');
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) showToast(error.message);
+      else showToast('Signed in successfully');
+    }
+
+    async function signOutUser() {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) showToast(error.message);
+      else showToast('Signed out. Local progress remains on this device.');
+    }
+
+    async function initializeSupabase() {
+      if (!supabaseClient) {
+        setCloudStatus('Not configured — local mode', 'Add your Supabase project URL and anon key in the script to enable cloud sync.');
+        return;
+      }
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      if (error) console.error('Could not read Supabase session:', error);
+      currentUser = session?.user || null;
+      updateAuthControls(currentUser);
+      if (currentUser) await loadUserCloudData(currentUser);
+      else setCloudStatus('Not signed in', 'Sign in to sync your syllabus progress across devices.');
+
+      supabaseClient.auth.onAuthStateChange((_event, sessionNow) => {
+        // Defer network work outside the auth callback to avoid holding Supabase's auth lock.
+        setTimeout(async () => {
+          const nextUser = sessionNow?.user || null;
+          const changedUser = nextUser?.id !== currentUser?.id;
+          currentUser = nextUser;
+          updateAuthControls(currentUser);
+          if (currentUser && changedUser) await loadUserCloudData(currentUser);
+          if (!currentUser) {
+            cloudReady = false;
+            setCloudStatus('Not signed in', 'Your local progress remains saved on this device. Sign in to sync across devices.');
+          }
+        }, 0);
+      });
+    }
+
+    /* ---------------- UI RENDERING ---------------- */
+    function renderApp() {
+      renderCategoryTabs();
+      renderBanner();
+      renderSubTierPills();
+      renderFilterChips();
+      renderSubjectCards();
+    }
+
+    // 1. Render Category Tabs (6 Tabs)
+    function renderCategoryTabs() {
+      const container = document.getElementById('categoryNavTabs');
+      container.innerHTML = '';
+
+      const categories = [
+        { key: 'upsc', label: 'UPSC CSE', icon: 'fa-landmark' },
+        { key: 'bpsc', label: 'BPSC', icon: 'fa-building-columns' },
+        { key: 'psir', label: 'PSIR Optional', icon: 'fa-scale-balanced' },
+        { key: 'ugcnet', label: 'UGC NET', icon: 'fa-book-bookmark' },
+        { key: 'current_affairs', label: 'Current Affairs', icon: 'fa-newspaper' },
+        { key: 'csat', label: 'CSAT', icon: 'fa-calculator' }
+      ];
+
+      categories.forEach(c => {
+        const isActive = (c.key === activeCategory);
+        const btn = document.createElement('button');
+        btn.className = `px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap flex items-center gap-2 transition-all ${
+          isActive
+            ? 'bg-white dark:bg-slate-800 text-cyan-700 dark:text-cyan-400 shadow-sm border border-slate-200 dark:border-slate-700 scale-[1.02]'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+        }`;
+        btn.innerHTML = `<i class="fa-solid ${c.icon} text-xs"></i> <span>${c.label}</span>`;
+        btn.onclick = () => switchCategory(c.key);
+        container.appendChild(btn);
+      });
+    }
+
+    function switchCategory(key) {
+      activeCategory = key;
+      activeSubTier = 'tier1';
+      renderApp();
+    }
+
+    // 2. Render Banner Header & Calculate Overall Progress
+    function renderBanner() {
+      const cat = appData[activeCategory];
+      const banner = document.getElementById('sectionHeaderBanner');
+      banner.className = `rounded-2xl p-4 sm:p-5 text-white shadow-md bg-gradient-to-r ${cat.colorClass} transition-all duration-300`;
+
+      document.getElementById('bannerTitle').innerText = cat.title;
+      document.getElementById('bannerDesc').innerText = cat.desc;
+
+      // Calculate progress of the active tier or category
+      const subjects = getActiveSubjectsList();
+      let totalTopics = 0;
+      let doneCount = 0;
+      let progCount = 0;
+      let pendCount = 0;
+
+      subjects.forEach(sub => {
+        sub.topics.forEach(t => {
+          totalTopics++;
+          if (t.status === 'completed') doneCount++;
+          else if (t.status === 'in_progress') progCount++;
+          else pendCount++;
+        });
+      });
+
+      // Composite percent: completed = 100%, in-progress = 50%
+      const effectiveScore = doneCount + (progCount * 0.5);
+      const percent = totalTopics > 0 ? Math.round((effectiveScore / totalTopics) * 100) : 0;
+
+      document.getElementById('bannerProgressPercent').innerText = `${percent}%`;
+      const subLabel = document.getElementById('bannerProgressSub');
+      if (subLabel) {
+        subLabel.innerText = `${doneCount} of ${totalTopics} Done`;
+      }
+
+      const donePercent = totalTopics > 0 ? (doneCount / totalTopics) * 100 : 0;
+      const progPercent = totalTopics > 0 ? (progCount / totalTopics) * 100 : 0;
+
+      document.getElementById('bannerProgressBarDone').style.width = `${donePercent}%`;
+      document.getElementById('bannerProgressBarProg').style.width = `${progPercent}%`;
+
+      document.getElementById('bannerDoneCount').innerText = `${doneCount} Done`;
+      document.getElementById('bannerProgCount').innerText = `${progCount} Progress`;
+      document.getElementById('bannerPendCount').innerText = `${pendCount} Pending`;
+    }
+
+    // 3. Render SubTier Pills (Prelims/Mains or Paper 1/Paper 2)
+    function renderSubTierPills() {
+      const cat = appData[activeCategory];
+      const container = document.getElementById('subTierContainer');
+      const pillsDiv = document.getElementById('subTierPills');
+
+      if (!cat.hasSubTiers) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      pillsDiv.innerHTML = '';
+
+      for (const tierKey in cat.subTierLabels) {
+        const info = cat.subTierLabels[tierKey];
+        const isSelected = (activeSubTier === tierKey);
+        const pill = document.createElement('button');
+        pill.className = `px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+          isSelected
+            ? 'bg-white dark:bg-slate-900 text-cyan-700 dark:text-cyan-400 shadow-sm'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+        }`;
+        pill.innerHTML = `<i class="fa-solid fa-${info.icon}"></i> ${info.label}`;
+        pill.onclick = () => {
+          activeSubTier = tierKey;
+          renderApp();
+        };
+        pillsDiv.appendChild(pill);
+      }
+    }
+
+    // 4. Render Filter Chips Highlight States
+    function renderFilterChips() {
+      ['all', 'pending', 'in_progress', 'completed'].forEach(s => {
+        const btn = document.getElementById(`sf-${s}`);
+        if (!btn) return;
+        if (activeStatusFilter === s) {
+          btn.className = "px-2.5 py-1 rounded-md transition font-extrabold bg-white dark:bg-slate-900 text-cyan-700 dark:text-cyan-300 shadow-sm";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-md transition text-slate-700 dark:text-slate-300 hover:bg-slate-300/40 dark:hover:bg-slate-700/50";
+        }
+      });
+
+      ['all', 'high', 'medium', 'low'].forEach(p => {
+        const btn = document.getElementById(`pf-${p}`);
+        if (!btn) return;
+        if (activePriorityFilter === p) {
+          btn.className = "px-2 py-1 rounded-md transition font-extrabold bg-white dark:bg-slate-900 text-cyan-700 dark:text-cyan-300 shadow-sm";
+        } else {
+          let textClass = p === 'high' ? 'text-rose-600 dark:text-rose-400' : p === 'medium' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400';
+          btn.className = `px-2 py-1 rounded-md transition ${textClass} hover:bg-slate-300/40 dark:hover:bg-slate-700/50`;
+        }
+      });
+    }
+
+    function setStatusFilter(status) {
+      activeStatusFilter = status;
+      renderApp();
+    }
+
+    function setPriorityFilter(priority) {
+      activePriorityFilter = priority;
+      renderApp();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderSubjectCards();
+    }
+
+    // Helper: Returns list of subjects currently active
+    function getActiveSubjectsList() {
+      const cat = appData[activeCategory];
+      if (cat.hasSubTiers) {
+        return cat.subjects[activeSubTier] || [];
+      }
+      return cat.subjects || [];
+    }
+
+    // 5. Render Subject Cards (Standard Vertical Stack)
+    function renderSubjectCards() {
+      const container = document.getElementById('subjectCardsList');
+      const emptyState = document.getElementById('emptyState');
+      const filterNotice = document.getElementById('filteredResultsLabel');
+      container.innerHTML = '';
+
+      const subjects = getActiveSubjectsList();
+      let visibleSubjectsCount = 0;
+      let totalVisibleTopics = 0;
+
+      subjects.forEach(sub => {
+        // Filter topics by status, priority, and search
+        const matchingTopics = sub.topics.filter(t => {
+          const matchStatus = (activeStatusFilter === 'all') || (t.status === activeStatusFilter);
+          const matchPriority = (activePriorityFilter === 'all') || (t.priority === activePriorityFilter);
+          const matchSearch = (!searchQuery) || t.name.toLowerCase().includes(searchQuery) || sub.title.toLowerCase().includes(searchQuery);
+          return matchStatus && matchPriority && matchSearch;
+        });
+
+        // If searching or filtering and no topics match, skip this subject card
+        if (matchingTopics.length === 0 && (searchQuery || activeStatusFilter !== 'all' || activePriorityFilter !== 'all')) {
+          return;
+        }
+
+        visibleSubjectsCount++;
+        totalVisibleTopics += matchingTopics.length;
+
+        // Subject stats
+        const subTotal = sub.topics.length;
+        const subDone = sub.topics.filter(t => t.status === 'completed').length;
+        const subProgress = sub.topics.filter(t => t.status === 'in_progress').length;
+        const subScore = subDone + (subProgress * 0.5);
+        const subPercent = subTotal > 0 ? Math.round((subScore / subTotal) * 100) : 0;
+
+        // Color badge accent
+        const colorClasses = {
+          teal: "border-teal-500 text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400",
+          blue: "border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400",
+          violet: "border-violet-500 text-violet-600 bg-violet-50 dark:bg-violet-950/40 dark:text-violet-400",
+          amber: "border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400",
+          rose: "border-rose-500 text-rose-600 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400",
+          slate: "border-slate-500 text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-300"
+        };
+        const themeClass = colorClasses[sub.color] || colorClasses.teal;
+
+        // Create Card Element
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm transition hover:shadow-md";
+
+        // Card Header
+        let cardHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-2.5 flex-1 min-w-0">
+              <span class="w-3 h-3 rounded-full border-2 ${themeClass} shrink-0"></span>
+              <h3 class="font-extrabold text-sm sm:text-base text-slate-800 dark:text-white truncate">${escapeHtml(sub.title)}</h3>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${themeClass} shrink-0">${subDone}/${subTotal} Done</span>
+            </div>
+
+            <!-- Card Controls -->
+            <div class="flex items-center gap-2 self-end sm:self-auto">
+              <!-- Add Topic to this subject -->
+              <button onclick="openAddTopicDialog('${sub.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1 transition">
+                <i class="fa-solid fa-plus text-[10px]"></i> Topic
+              </button>
+              <!-- Delete subject -->
+              <button onclick="deleteSubject('${sub.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition" title="Delete Subject">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Subject Progress Bar -->
+          <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-3 mb-3">
+            <div class="bg-cyan-600 dark:bg-cyan-500 h-full rounded-full transition-all duration-300" style="width: ${subPercent}%"></div>
+          </div>
+        `;
+
+        // Topic List Container
+        cardHTML += `<div class="space-y-1.5 pt-1">`;
+
+        if (matchingTopics.length === 0) {
+          cardHTML += `
+            <div class="py-4 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
+              No topics in this subject match the active filters.
+            </div>
+          `;
+        } else {
+          matchingTopics.forEach(topic => {
+            const isCompleted = (topic.status === 'completed');
+            const isInProgress = (topic.status === 'in_progress');
+
+            // Topic box class
+            let boxBg = "bg-slate-50/70 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-800";
+            if (isCompleted) boxBg = "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50";
+            if (isInProgress) boxBg = "bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50";
+
+            // Status Icon button
+            let statusBtnClass = "state-pending";
+            let statusIcon = "";
+            let statusBadge = `<span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Pending</span>`;
+
+            if (isCompleted) {
+              statusBtnClass = "state-completed";
+              statusIcon = `<i class="fa-solid fa-check text-[11px]"></i>`;
+              statusBadge = `<span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">Done</span>`;
+            } else if (isInProgress) {
+              statusBtnClass = "state-progress";
+              statusIcon = `<i class="fa-solid fa-spinner fa-spin text-[11px]"></i>`;
+              statusBadge = `<span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300">Progress</span>`;
+            }
+
+            // Priority Badge
+            let priorityBadge = '';
+            if (topic.priority === 'high') {
+              priorityBadge = `<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800">High</span>`;
+            } else if (topic.priority === 'low') {
+              priorityBadge = `<span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Low</span>`;
+            } else {
+              priorityBadge = `<span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800">Med</span>`;
+            }
+
+            // Topic Label Text
+            const textClass = isCompleted
+              ? "line-through text-slate-400 dark:text-slate-500 font-medium"
+              : "text-slate-700 dark:text-slate-200 font-semibold";
+
+            cardHTML += `
+              <div class="flex items-center justify-between gap-2.5 p-2 rounded-xl border ${boxBg} transition group">
+                <!-- Interactive Cycle Trigger Area -->
+                <div class="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer select-none" onclick="cycleTopicStatus('${sub.id}', '${topic.id}')">
+                  <button type="button" class="status-btn ${statusBtnClass}" title="Status: ${topic.status} (Click to cycle)">
+                    ${statusIcon}
+                  </button>
+                  <span class="text-xs sm:text-sm ${textClass} leading-snug flex-1 break-words">${escapeHtml(topic.name)}</span>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    ${priorityBadge}
+                    ${statusBadge}
+                  </div>
+                </div>
+
+                <!-- Delete Topic Button -->
+                <button onclick="deleteTopic('${sub.id}', '${topic.id}')" class="opacity-40 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1 transition" title="Delete Topic">
+                  <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+              </div>
+            `;
+          });
+        }
+
+        cardHTML += `</div>`;
+        card.innerHTML = cardHTML;
+        container.appendChild(card);
+      });
+
+      // Show/Hide Empty state
+      if (visibleSubjectsCount === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      // Filter count badge indicator
+      if (activeStatusFilter !== 'all' || activePriorityFilter !== 'all' || searchQuery) {
+        filterNotice.innerText = `Showing ${totalVisibleTopics} filtered topic(s)`;
+        filterNotice.classList.remove('hidden');
+      } else {
+        filterNotice.classList.add('hidden');
+      }
+    }
+
+    /* ---------------- TOPIC & SUBJECT ACTIONS ---------------- */
+
+    // 3-State Cycle: Pending -> In Progress -> Completed -> Pending
+    function cycleTopicStatus(subjectId, topicId) {
+      const subjects = getActiveSubjectsList();
+      const sub = subjects.find(s => s.id === subjectId);
+      if (!sub) return;
+
+      const topic = sub.topics.find(t => t.id === topicId);
+      if (!topic) return;
+
+      if (topic.status === 'pending') {
+        topic.status = 'in_progress';
+      } else if (topic.status === 'in_progress') {
+        topic.status = 'completed';
+      } else {
+        topic.status = 'pending';
+      }
+
+      saveData();
+      renderApp();
+    }
+
+    // Delete single topic
+    function deleteTopic(subjectId, topicId) {
+      const subjects = getActiveSubjectsList();
+      const sub = subjects.find(s => s.id === subjectId);
+      if (!sub) return;
+
+      sub.topics = sub.topics.filter(t => t.id !== topicId);
+      saveData();
+      renderApp();
+      showToast("Topic deleted");
+    }
+
+    // Delete entire subject
+    function deleteSubject(subjectId) {
+      const cat = appData[activeCategory];
+      let confirmed = confirm("Are you sure you want to delete this entire subject and all its topics?");
+      if (!confirmed) return;
+
+      if (cat.hasSubTiers) {
+        cat.subjects[activeSubTier] = cat.subjects[activeSubTier].filter(s => s.id !== subjectId);
+      } else {
+        cat.subjects = cat.subjects.filter(s => s.id !== subjectId);
+      }
+
+      saveData();
+      renderApp();
+      showToast("Subject removed");
+    }
+
+    /* ---------------- MODAL MANAGEMENT ---------------- */
+
+    // Add Subject Dialog
+    function openAddSubjectDialog() {
+      document.getElementById('newSubjectTitle').value = '';
+      selectSubjectColor('teal');
+      document.getElementById('addSubjectModal').classList.remove('hidden');
+      document.getElementById('addSubjectModal').classList.add('flex');
+      setTimeout(() => document.getElementById('newSubjectTitle').focus(), 50);
+    }
+
+    function closeAddSubjectDialog() {
+      document.getElementById('addSubjectModal').classList.add('hidden');
+      document.getElementById('addSubjectModal').classList.remove('flex');
+    }
+
+    function selectSubjectColor(colorName) {
+      selectedColorForNewSubject = colorName;
+      document.querySelectorAll('.color-picker-dot').forEach(dot => {
+        if (dot.getAttribute('data-color') === colorName) {
+          dot.classList.add('ring-2', 'ring-offset-2', 'ring-cyan-600', 'dark:ring-offset-slate-900');
+        } else {
+          dot.classList.remove('ring-2', 'ring-offset-2', 'ring-cyan-600', 'dark:ring-offset-slate-900');
+        }
+      });
+    }
+
+    document.querySelectorAll('.color-picker-dot').forEach(dot => {
+      dot.addEventListener('click', function() {
+        selectSubjectColor(this.getAttribute('data-color'));
+      });
+    });
+
+    function saveNewSubject() {
+      const title = document.getElementById('newSubjectTitle').value.trim();
+      if (!title) {
+        showToast("Please enter a subject title");
+        return;
+      }
+
+      const newSub = {
+        id: "sub_" + Math.random().toString(36).substring(2, 9),
+        title: title,
+        color: selectedColorForNewSubject,
+        topics: []
+      };
+
+      const cat = appData[activeCategory];
+      if (cat.hasSubTiers) {
+        cat.subjects[activeSubTier].push(newSub);
+      } else {
+        cat.subjects.push(newSub);
+      }
+
+      saveData();
+      closeAddSubjectDialog();
+      renderApp();
+      showToast("Custom subject added");
+    }
+
+    // Add Topic Dialog (with Priority Selector)
+    function openAddTopicDialog(subjectId) {
+      currentTargetSubjectId = subjectId;
+      const subjects = getActiveSubjectsList();
+      const sub = subjects.find(s => s.id === subjectId);
+      if (!sub) return;
+
+      document.getElementById('modalSubjectNameSub').innerText = `Under: ${sub.title}`;
+      document.getElementById('newTopicNamesInput').value = '';
+      selectModalPriority('high'); // Default to high priority
+
+      document.getElementById('addTopicModal').classList.remove('hidden');
+      document.getElementById('addTopicModal').classList.add('flex');
+      setTimeout(() => document.getElementById('newTopicNamesInput').focus(), 50);
+    }
+
+    function closeAddTopicDialog() {
+      document.getElementById('addTopicModal').classList.add('hidden');
+      document.getElementById('addTopicModal').classList.remove('flex');
+      currentTargetSubjectId = null;
+    }
+
+    function selectModalPriority(priority) {
+      selectedPriorityForNewTopic = priority;
+
+      const btnHigh = document.getElementById('priorityBtn-high');
+      const btnMed = document.getElementById('priorityBtn-medium');
+      const btnLow = document.getElementById('priorityBtn-low');
+
+      // Reset base styling
+      btnHigh.className = "py-2 px-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition hover:border-rose-400";
+      btnMed.className = "py-2 px-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition hover:border-amber-400";
+      btnLow.className = "py-2 px-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition hover:border-slate-400";
+
+      if (priority === 'high') {
+        btnHigh.className = "py-2 px-2 rounded-xl border-2 border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition";
+      } else if (priority === 'medium') {
+        btnMed.className = "py-2 px-2 rounded-xl border-2 border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition";
+      } else if (priority === 'low') {
+        btnLow.className = "py-2 px-2 rounded-xl border-2 border-slate-500 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-extrabold text-xs flex items-center justify-center gap-1.5 transition";
+      }
+    }
+
+    function saveNewTopics() {
+      const rawText = document.getElementById('newTopicNamesInput').value;
+      if (!rawText.trim() || !currentTargetSubjectId) {
+        showToast("Please enter at least one topic name");
+        return;
+      }
+
+      // Split by comma or new line
+      const names = rawText
+        .split(/[\n,]+/)
+        .map(n => n.trim())
+        .filter(n => n.length > 0);
+
+      if (names.length === 0) return;
+
+      const subjects = getActiveSubjectsList();
+      const sub = subjects.find(s => s.id === currentTargetSubjectId);
+      if (!sub) return;
+
+      names.forEach(name => {
+        sub.topics.push({
+          id: "tp_" + Math.random().toString(36).substring(2, 9),
+          name: name,
+          status: "pending",
+          priority: selectedPriorityForNewTopic
+        });
+      });
+
+      saveData();
+      closeAddTopicDialog();
+      renderApp();
+      showToast(`${names.length} Topic(s) added (${selectedPriorityForNewTopic.toUpperCase()})`);
+    }
+
+    /* ---------------- DAY/NIGHT & FULLSCREEN TOGGLE ---------------- */
+    function initTheme() {
+      const savedTheme = localStorage.getItem('civilprep_theme');
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').className = 'fa-solid fa-sun';
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('themeIcon').className = 'fa-solid fa-moon';
+      }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('civilprep_theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+
+    function toggleFullScreen() {
+      const icon = document.getElementById('fullscreenIcon');
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn("Fullscreen request error:", err);
+        });
+        icon.className = 'fa-solid fa-compress';
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+        icon.className = 'fa-solid fa-expand';
+      }
+    }
+
+    /* ---------------- BACKUP IMPORT / EXPORT ---------------- */
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `CivilPrep_Syllabus_Backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast("Backup exported successfully");
+    }
+
+    function importDataJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && typeof parsed === 'object') {
+            appData = parsed;
+            ensureSchemaIntegrity();
+            saveData();
+            renderApp();
+            showToast("Backup restored successfully");
+          } else {
+            showToast("Invalid JSON backup file");
+          }
+        } catch (err) {
+          showToast("Error reading JSON file");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    /* ---------------- UTILITIES ---------------- */
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMessage').innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2400);
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    /* ---------------- APP BOOTSTRAP ---------------- */
+    window.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
+      initializeData();
+      renderApp();
+      await initializeSupabase();
+    });
+  </script>
+</body>
+</html>
